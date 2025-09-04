@@ -1,5 +1,13 @@
 // console.log('JS connected');
 
+
+function pronounceWord(word) {
+  const utterance = new SpeechSynthesisUtterance(word);
+  utterance.lang = "en-EN"; // English
+  window.speechSynthesis.speak(utterance);
+}
+
+
 const createElements = (arr) =>{
     const htmlElements = arr.map((el) => `<span class="btn">${el}</span>`)
 
@@ -76,7 +84,7 @@ const displayLevelWord = (words) =>{
                 <h2 class="font-bangla font-semibold text-2xl">"${word.meaning ? word.meaning : 'অর্থ পাওয়া যায়নি'} / ${word.pronunciation ? word.pronunciation: 'pronunciation পাওয়া যায়নি'}"</h2>
                 <div class="flex justify-between"> 
                     <button onclick="loadWordDetails(${word.id})" class="bg-[#1A91FF20] p-3 hover:bg-[#1A91FF80] cursor-pointer rounded-lg"><i class="fa-solid fa-circle-info"></i></button>
-                    <button class="bg-[#1A91FF20] p-3 hover:bg-[#1A91FF80] cursor-pointer rounded-lg"><i class="fa-solid fa-volume-high"></i></button>
+                    <button onclick="pronounceWord('${word.word}')" class="bg-[#1A91FF20] p-3 hover:bg-[#1A91FF80] cursor-pointer rounded-lg"><i class="fa-solid fa-volume-high"></i></button>
                 </div>
             </div>
         `
@@ -148,3 +156,24 @@ const displayLessons = lessons => {
 }
 
 lessonsPost();
+
+                                // Input Search 
+document.getElementById('btn-search').addEventListener('click', () => {
+    removeActive();
+    const input = document.getElementById('input-search');
+    const searchValue = input.value.trim().toLowerCase();
+    // console.log(searchValue);
+
+    const url = `https://openapi.programming-hero.com/api/words/all`;
+    fetch(url)
+    .then(response => response.json())
+    .then(data => {
+        const allWords = data.data
+        // console.log(allWords)
+        const filterWords = allWords.filter((word) => {
+              return word.word.toLowerCase().includes(searchValue);
+        });
+        displayLevelWord(filterWords);
+    })
+});
+
