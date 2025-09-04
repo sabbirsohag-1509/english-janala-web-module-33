@@ -1,13 +1,34 @@
 // console.log('JS connected');
 
+const createElements = (arr) =>{
+    const htmlElements = arr.map((el) => `<span class="btn">${el}</span>`)
+
+    return htmlElements.join(" ");
+}
+
+
+const showLoading = () => {
+    document.getElementById('loading').classList.remove('hidden')
+}
+const hideLoading = () => {
+    document.getElementById('loading').classList.add('hidden')
+}
+
+
 const lessonsPost = () => {
+    showLoading(); // loading শুরু 
 const url = `https://openapi.programming-hero.com/api/levels/all`;
 fetch(url)
 .then((response) => response.json() )
 .then((data) => {
     displayLessons(data.data)
+    hideLoading(); // data আসার পর loading বন্ধ হবে
 })
+    .catch(() => {
+        hideLoading(); //error হলেও বন্ধ হবে
+    })
 }
+
 
 const loadLevelWord = (id) =>{
     // console.log(id)
@@ -54,7 +75,7 @@ const displayLevelWord = (words) =>{
                 <p class="text-lg">Meaning / Pronunciation</p>
                 <h2 class="font-bangla font-semibold text-2xl">"${word.meaning ? word.meaning : 'অর্থ পাওয়া যায়নি'} / ${word.pronunciation ? word.pronunciation: 'pronunciation পাওয়া যায়নি'}"</h2>
                 <div class="flex justify-between"> 
-                    <button onclick="my_modal_5.showModal()" class="bg-[#1A91FF20] p-3 hover:bg-[#1A91FF80] cursor-pointer rounded-lg"><i class="fa-solid fa-circle-info"></i></button>
+                    <button onclick="loadWordDetails(${word.id})" class="bg-[#1A91FF20] p-3 hover:bg-[#1A91FF80] cursor-pointer rounded-lg"><i class="fa-solid fa-circle-info"></i></button>
                     <button class="bg-[#1A91FF20] p-3 hover:bg-[#1A91FF80] cursor-pointer rounded-lg"><i class="fa-solid fa-volume-high"></i></button>
                 </div>
             </div>
@@ -62,6 +83,42 @@ const displayLevelWord = (words) =>{
         wordContainer.appendChild(card)
     })
 }
+
+const loadWordDetails = async (id) =>{
+    const url = `https://openapi.programming-hero.com/api/word/${id}`
+    const res = await fetch(url)
+    const details = await res.json()
+    displayLoadWordDetails(details.data)
+}
+const displayLoadWordDetails = (word) =>{
+    const detailsContainer = document.getElementById('details-container')
+    detailsContainer.innerHTML = `  
+    
+            <div> 
+        <h2 class="text-3xl font-bold ">${word.word} (<i class="fa-solid fa-microphone-lines"></i> :${word.pronunciation})</h2>
+      </div>
+      <div> 
+        <h2 class="font-semibold text-xl">Meaning</h2>
+        <p class="font-bangla text-lg">${word.meaning}</p>
+      </div>
+      <div> 
+        <h2 class="font-semibold text-xl">Example</h2>
+        <p class="text-lg">${word.sentence}</p>
+      </div>
+      <div> 
+        <h2 class="font-semibold text-xl font-bangla">সমার্থক শব্দ গুলো</h2>
+        <div>${createElements(word.synonyms)}</div>
+      </div>
+      <div> 
+        <button class="btn btn-success">Complete Learning</button>
+      </div>
+    
+    
+    `
+    document.getElementById('word_modal').showModal()
+   
+}
+
 
 const removeActive = () =>{
     const lessonButtons = document.querySelectorAll('.lesson-btn')
